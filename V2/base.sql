@@ -86,3 +86,7 @@ INSERT INTO images_objet (id_image, id_objet, nom_image) VALUES
 (8, 8, 'mixeur.jpg'),
 (9, 9, 'mascara.jpg'),
 (10, 10, 'ponceuse.jpg');
+
+UPDATE emprunt
+SET etat_retour = 'Abîmé'
+WHERE id_emprunt = 11;

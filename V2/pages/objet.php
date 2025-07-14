@@ -2,7 +2,7 @@
 
 include '../includes/db.php';
 include_once '../fonction/fonction.php';
-$conn = connectserv();
+$conn = connectlocal();
 
 $id_objet = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $message = '';

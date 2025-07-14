@@ -35,8 +35,8 @@ alea:
 -creer un bouton emprunter
 
 -fiche membres (
-    afficher liste empreint 
+    ok afficher liste empreint 
     bouton rendre
-    etat= OK ou abime)
+    ok etat= OK ou abime)
 
 -nouvelle page objet abbime et OK nbr seulement

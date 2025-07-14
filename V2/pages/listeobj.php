@@ -1,7 +1,7 @@
 <?php
 include '../includes/db.php';
 include_once '../fonction/fonction.php';
-$conn = connectserv();
+$conn = connectlocal();
 
 $categorie = isset($_GET['categorie']) ? intval($_GET['categorie']) : 0;
 $categories = getCategories();
@@ -33,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajout_objet'])) {
         <div class="row justify-content-center mb-4">
             <div class="col-md-10">
                 <div class="card shadow">
+                    <a href="fichemembre.php" class="btn btn-outline-primary mb-3">📋 Voir la liste des membres</a>
                     <div class="card-header bg-primary text-white text-center">
                         <h4 class="mb-0">Ajouter un objet</h4>
                     </div>
