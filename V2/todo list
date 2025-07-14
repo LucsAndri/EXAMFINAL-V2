@@ -19,7 +19,7 @@ ok Filtre par catégorie
 
 V2:
 ok Améliorer au maximum le design
-Ajout d’un nouvel objet (avec upload d’image) par un membre
+ok Ajout d’un nouvel objet (avec upload d’image) par un membre
 on peut avoir plusieurs images, mais la 1ère image sera l’image principale à afficher sur la liste des objets)
 on peut supprimer les images
 s’il n’y a pas d’images, mettre une image par défaut
