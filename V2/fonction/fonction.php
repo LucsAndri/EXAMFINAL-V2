@@ -69,8 +69,12 @@ function listeobjtFiltre($categorie = 0) {
 function ajouterObjet($nom_objet, $id_categorie, $id_membre, $image_file) {
     global $conn;
     $message = '';
-    $img_name = basename($image_file['name']);
+
+    // Nettoyer le nom de l'objet pour le nom de l'image
+    $img_name = strtolower(str_replace(' ', '_', iconv('UTF-8', 'ASCII//TRANSLIT', $nom_objet))) . '.jpg';
     $img_path = '../../images/' . $img_name;
+
+    // Sauvegarder l'image sous le nouveau nom
     if (move_uploaded_file($image_file['tmp_name'], $img_path)) {
         $stmt = $conn->prepare("INSERT INTO objet (nom_objet, id_categorie, id_membre) VALUES (?, ?, ?)");
         $stmt->bind_param("sii", $nom_objet, $id_categorie, $id_membre);
