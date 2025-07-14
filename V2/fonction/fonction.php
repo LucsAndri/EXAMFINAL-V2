@@ -22,8 +22,21 @@ function getCategories() {
     }
     return $categories;
 }
-
-function listeobjtFiltre($categorie = 0) {
+function listeobjtFiltre($categorie = 0, $nom_objet = '', $disponible = false) {
+    global $conn;
+    $sql = "SELECT o.id_objet, o.nom_objet, i.nom_image 
+            FROM objet o 
+            LEFT JOIN images_objet i ON o.id_objet = i.id_objet WHERE 1";
+    if ($categorie > 0) {
+        $sql .= " AND o.id_categorie = " . intval($categorie);
+    }
+    if ($nom_objet !== '') {
+        $sql .= " AND o.nom_objet LIKE '%" . $conn->real_escape_string($nom_objet) . "%'";
+    }
+    if ($disponible) {
+        $sql .= " AND o.id_objet NOT IN (SELECT id_objet FROM emprunt WHERE date_retour >= CURDATE())";
+    }
+    $sql .= " ORDER BY o.nom_objet ASC";
     global $conn;
     $sql = "SELECT o.id_objet, o.nom_objet, i.nom_image 
             FROM objet o 
@@ -39,10 +52,12 @@ function listeobjtFiltre($categorie = 0) {
                 <th>Nom de l\'objet</th>
                 <th>Image</th>
                 <th>Emprunt</th>
+                <th>Fiche</th>
               </tr></thead><tbody>';
         while ($row = $result->fetch_assoc()) {
             echo '<tr>';
-            echo '<td>' . htmlspecialchars($row['nom_objet']) . '</td>';
+            // Nom de l'objet avec lien vers la fiche
+            echo '<td><a href="objet.php?id=' . $row['id_objet'] . '" class="text-decoration-none text-primary">' . htmlspecialchars($row['nom_objet']) . '</a></td>';
             $nomImage = trim($row['nom_image']);
             $imagePath = '../images/' . $nomImage;
             $imageDiskPath = __DIR__ . '/../images/' . $nomImage;
@@ -59,6 +74,8 @@ function listeobjtFiltre($categorie = 0) {
             } else {
                 echo '<td><span class="text-success">Disponible</span></td>';
             }
+            // Bouton fiche
+            echo '<td><a href="objet.php?id=' . $row['id_objet'] . '" class="btn btn-outline-primary btn-sm">Voir fiche</a></td>';
             echo '</tr>';
         }
         echo '</tbody></table>';
@@ -89,5 +106,112 @@ function ajouterObjet($nom_objet, $id_categorie, $id_membre, $image_file) {
         $message = '<div class="alert alert-danger">Erreur lors de l\'upload de l\'image.</div>';
     }
     return $message;
+}
+function afficherFicheObjet($id_objet) {
+    global $conn;
+    $sql = "SELECT o.nom_objet, o.id_categorie, o.id_membre, c.nom_categorie 
+            FROM objet o 
+            JOIN categorie_objet c ON o.id_categorie = c.id_categorie 
+            WHERE o.id_objet = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id_objet);
+    $stmt->execute();
+    $objet = $stmt->get_result()->fetch_assoc();
+
+    $imgSql = "SELECT nom_image FROM images_objet WHERE id_objet = ?";
+    $imgStmt = $conn->prepare($imgSql);
+    $imgStmt->bind_param("i", $id_objet);
+    $imgStmt->execute();
+    $imgResult = $imgStmt->get_result();
+    $images = [];
+    while ($img = $imgResult->fetch_assoc()) {
+        $images[] = $img['nom_image'];
+    }
+
+    $empSql = "SELECT e.date_emprunt, e.date_retour, m.nom 
+               FROM emprunt e 
+               JOIN membre m ON e.id_membre = m.id_membre 
+               WHERE e.id_objet = ? ORDER BY e.date_emprunt DESC";
+    $empStmt = $conn->prepare($empSql);
+    $empStmt->bind_param("i", $id_objet);
+    $empStmt->execute();
+    $empResult = $empStmt->get_result();
+
+    echo '<div class="card mb-4">';
+    echo '<div class="card-header bg-primary text-white"><h3>' . htmlspecialchars($objet['nom_objet']) . '</h3></div>';
+    echo '<div class="card-body">';
+    echo '<p><strong>Catégorie :</strong> ' . htmlspecialchars($objet['nom_categorie']) . '</p>';
+    echo '<div class="mb-3">';
+    if (count($images) > 0) {
+        echo '<img src="../images/' . htmlspecialchars($images[0]) . '" class="img-fluid mb-2" style="max-width:300px;" alt="Image principale">';
+        if (count($images) > 1) {
+            echo '<div class="d-flex flex-wrap">';
+            foreach (array_slice($images, 1) as $img) {
+                echo '<img src="../images/' . htmlspecialchars($img) . '" class="img-thumbnail m-1" style="max-width:100px;" alt="Autre image">';
+            }
+            echo '</div>';
+        }
+    } else {
+        echo '<img src="../images/default.jpg" class="img-fluid mb-2" style="max-width:300px;" alt="Image par défaut">';
+    }
+    echo '</div>';
+    echo '<h5>Historique des emprunts</h5>';
+    if ($empResult->num_rows > 0) {
+        echo '<table class="table table-bordered">';
+        echo '<thead><tr><th>Membre</th><th>Date emprunt</th><th>Date retour</th></tr></thead><tbody>';
+        while ($emp = $empResult->fetch_assoc()) {
+            echo '<tr>';
+            echo '<td>' . htmlspecialchars($emp['nom']) . '</td>';
+            echo '<td>' . htmlspecialchars($emp['date_emprunt']) . '</td>';
+            echo '<td>' . htmlspecialchars($emp['date_retour']) . '</td>';
+            echo '</tr>';
+        }
+        echo '</tbody></table>';
+    } else {
+        echo '<p>Aucun emprunt pour cet objet.</p>';
+    }
+    echo '</div></div>';
+}
+
+function afficherFicheMembre($id_membre) {
+    global $conn;
+    // Infos du membre
+    $sql = "SELECT * FROM membre WHERE id_membre = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id_membre);
+    $stmt->execute();
+    $membre = $stmt->get_result()->fetch_assoc();
+
+    echo '<div class="card mb-4">';
+    echo '<div class="card-header bg-primary text-white"><h3>' . htmlspecialchars($membre['nom']) . '</h3></div>';
+    echo '<div class="card-body">';
+    echo '<p><strong>Email :</strong> ' . htmlspecialchars($membre['email']) . '</p>';
+    echo '<p><strong>Ville :</strong> ' . htmlspecialchars($membre['ville']) . '</p>';
+    echo '<p><strong>Date de naissance :</strong> ' . htmlspecialchars($membre['date_naissance']) . '</p>';
+    echo '<img src="../images/' . htmlspecialchars($membre['image_profil']) . '" class="img-thumbnail mb-3" style="max-width:120px;">';
+
+    // Objets regroupés par catégorie
+    $catSql = "SELECT c.nom_categorie, o.nom_objet 
+               FROM objet o 
+               JOIN categorie_objet c ON o.id_categorie = c.id_categorie 
+               WHERE o.id_membre = ? 
+               ORDER BY c.nom_categorie, o.nom_objet";
+    $catStmt = $conn->prepare($catSql);
+    $catStmt->bind_param("i", $id_membre);
+    $catStmt->execute();
+    $catResult = $catStmt->get_result();
+
+    $grouped = [];
+    while ($row = $catResult->fetch_assoc()) {
+        $grouped[$row['nom_categorie']][] = $row['nom_objet'];
+    }
+
+    echo '<h5>Objets du membre</h5>';
+    foreach ($grouped as $cat => $objs) {
+        echo '<strong>' . htmlspecialchars($cat) . ' :</strong> ';
+        echo implode(', ', array_map('htmlspecialchars', $objs));
+        echo '<br>';
+    }
+    echo '</div></div>';
 }
 ?>
