@@ -33,3 +33,10 @@ dans la fiche membre, mettre les infos du membre, ainsi que les objets du membre
 
 alea:
 -creer un bouton emprunter
+
+-fiche membres (
+    afficher liste empreint 
+    bouton rendre
+    etat= OK ou abime)
+
+-nouvelle page objet abbime et OK nbr seulement
