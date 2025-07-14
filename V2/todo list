@@ -1,0 +1,31 @@
+V1:
+ok creer base:
+ok membre (id_membre, nom , date de naissance, genre, émail, ville, mdp, image_profil)
+ok categorie_objet (id_categorie, nom_categorie )
+ok objet (id_objet , nom_objet , id_categorie, id_membre)
+ok images_objet(id_image, id_objet, nom_image)
+ok emprunt(id_emprunt, id_objet, id_membre, date_emprunt, date_retour)
+ok Insérer les données de test
+ok 4  membres
+ok 4 catégories ( esthétique, bricolage, mécanique , cuisine )
+ok 10 objets par membre à répartir sur les catégories
+ok 10 emprunts
+
+creer page:
+ok index
+en cours Login et inscription
+ok Liste des objets , (ok avec date de retour si emprunt en cours )
+ok Filtre par catégorie
+
+V2:
+ok Améliorer au maximum le design
+Ajout d’un nouvel objet (avec upload d’image) par un membre
+on peut avoir plusieurs images, mais la 1ère image sera l’image principale à afficher sur la liste des objets)
+on peut supprimer les images
+s’il n’y a pas d’images, mettre une image par défaut
+Lorsqu’on clique sur un objet dans la liste, afficher la fiche de l’objet (image principale + autres images) avec l’historique des emprunts
+mettre les critères de recherche suivant sur la liste des objets
+catégorie (zone de liste)
+nom de l’objet 
+case à cocher disponible
+dans la fiche membre, mettre les infos du membre, ainsi que les objets du membre regroupés par catégorie
