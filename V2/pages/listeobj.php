@@ -1,7 +1,7 @@
 <?php
 include '../includes/db.php';
 include_once '../fonction/fonction.php';
-$conn = connectlocal();
+$conn = connectserv();
 
 $categorie = isset($_GET['categorie']) ? intval($_GET['categorie']) : 0;
 $categories = getCategories();

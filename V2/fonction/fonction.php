@@ -214,4 +214,29 @@ function afficherFicheMembre($id_membre) {
     }
     echo '</div></div>';
 }
+function supprimerImageObjet($id_image) {
+    global $conn;
+    // Récupérer le nom de l'image
+    $sql = "SELECT nom_image FROM images_objet WHERE id_image = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id_image);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($img = $result->fetch_assoc()) {
+        $img_path = __DIR__ . '/../images/' . $img['nom_image'];
+        // Supprimer le fichier si il existe
+        if (file_exists($img_path)) {
+            unlink($img_path);
+        }
+        // Supprimer de la table
+        $delSql = "DELETE FROM images_objet WHERE id_image = ?";
+        $delStmt = $conn->prepare($delSql);
+        $delStmt->bind_param("i", $id_image);
+        $delStmt->execute();
+        return '<div class="alert alert-success">Image supprimée.</div>';
+    } else {
+        return '<div class="alert alert-danger">Image introuvable.</div>';
+    }
+}
+
 ?>

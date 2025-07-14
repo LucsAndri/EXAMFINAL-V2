@@ -1,9 +1,15 @@
 <?php
+
 include '../includes/db.php';
 include_once '../fonction/fonction.php';
-$conn = connectlocal();
+$conn = connectserv();
 
 $id_objet = isset($_GET['id']) ? intval($_GET['id']) : 0;
+$message = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['supprimer_image'])) {
+    $id_image = intval($_POST['supprimer_image']);
+    $message = supprimerImageObjet($id_image);
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -14,6 +20,7 @@ $id_objet = isset($_GET['id']) ? intval($_GET['id']) : 0;
 </head>
 <body class="bg-light">
     <div class="container mt-5">
+        <?= $message ?>
         <?php
         if ($id_objet > 0) {
             afficherFicheObjet($id_objet);
